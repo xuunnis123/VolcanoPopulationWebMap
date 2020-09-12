@@ -2,38 +2,37 @@ import sys
 import folium
 import pandas
 
-data=pandas.read_csv("Volcanoes.txt")
+data=pandas.read_csv("volcano.txt",delimiter="\t")
+#data=list(pandas.read_csv("volcano.csv"))
+
 lat=list(data["LAT"])
 lon=list(data["LON"])
 elev=list(data["ELEV"])
 name=list(data["NAME"])
 def color_producer(elevation):
-    if elevation<1000:
+    if elevation<0:
         return 'orange'
+    elif 0<=elevation<1000:
+        return 'purple'
     elif 1000<=elevation<=2000:
         return 'blue'
     else:return 'pink'
 
-# html = """
-# Volcano name:<br>
-# <a href="https://www.google.com/search?q=%%22%s%%22" target="_blank">%s</a><br>
-# Height: %s m
-# """
+
 
 map=folium.Map(location=[38.58,-99.09],zoom_start=6,tiles="Stamen Terrain")
 
 fgv=folium.FeatureGroup(name="Volcanoes")
 
-for lt,ln,el in zip(lat,lon,elev):
-    #iframe = folium.IFrame(html=html % (name, name, el), width=200, height=100)
-    #fg.add_child(folium.Marker(location=[lt,ln],popup=folium.Popup(str(el)+"m"), icon=folium.Icon(color=color_producer(el))))
-    fgv.add_child(folium.CircleMarker(location=[lt,ln],radius=6,popup=str(el)+" m",
+for lt,ln,el,na in zip(lat,lon,elev,name):
+    
+    fgv.add_child(folium.CircleMarker(location=[lt,ln],radius=6,popup=str(na)+":"+str(el)+"m",
     fill_color=color_producer(el),color='grey',fill_opacity=0.7))
 
 fgp=folium.FeatureGroup(name="Population")
 
 fgp.add_child(folium.GeoJson(data=open('world.json','r',encoding='utf-8-sig').read(),
-style_function=lambda x: {'fillColor':'green' if x['properties']['POP2005']<10000000 else 'orange' if 10000000 <= x['properties']['POP2005']<20000000 else 'red'}))
+style_function=lambda x: {'fillColor':'green' if x['properties']['POP2005']<10000000 else 'orange' if 1000000 <= x['properties']['POP2005']<50000000 else 'red'}))
 
 map.add_child(fgv)
 map.add_child(fgp)
